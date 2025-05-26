@@ -1,55 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Connection Status</title>
+  <meta charset="UTF-8" />
+  <title>Device Status Checker</title>
+  <style>
+    #status {
+      margin-top: 1em;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+    }
+    #checkBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <!-- Hidden probe image -->
-  <img src="http://local.mariana/favicon.ico" style="display:none"
-       onload="console.log('Device is online!')"
-       onerror="console.log('Device is offline or unreachable.')">
-
-  <div id="status">Not connected</div>
+  <h2>Device Status Checker</h2>
+  <button id="checkBtn">Check Device Status</button>
+  <div id="status">Click "Check Device Status" to start.</div>
 
   <script>
-    async function checkConnections() {
-      let status = [];
+    let popupLocalhost = null;
+    let popupMariana = null;
 
-      // Check local client via fetch (allowed)
-      try {
-        const localResponse = await fetch(`http://localhost:8000/active?cacheBust=${Date.now()}`);
-        const localText = await localResponse.text();
-        if (localText.trim() === 'true') {
-          status.push('Connected via local client');
-        }
-      } catch (e) {
-        // Local connection failed, do nothing
+    function openStatusWindows() {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = 'Checking devices...';
+
+      const features = 'width=300,height=150,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
+
+      popupLocalhost = window.open('http://localhost:8000/checkstatus', 'popupLocalhost', features);
+      popupMariana = window.open('http://local.mariana/checkstatus', 'popupMariana', features);
+
+      if (!popupLocalhost || popupLocalhost.closed) {
+        statusDiv.textContent = 'Popup blocked! Please allow popups and try again.';
+        return;
+      }
+      if (!popupMariana || popupMariana.closed) {
+        statusDiv.textContent += ' Popup for local.mariana blocked!';
       }
 
-      // Check external client via <img> probe
-      const img = new Image();
-      img.onload = () => {
-        status.push('Connected via external client');
-        updateStatus();
-      };
-      img.onerror = () => {
-        updateStatus();
-      };
-      img.src = `http://10.55.0.1/favicon.ico?cacheBust=${Date.now()}`;
-
-      // Fallback timeout to update UI if image request hangs
-      const timeout = setTimeout(updateStatus, 2000);
-
-      function updateStatus() {
-        clearTimeout(timeout);
-        const statusDiv = document.getElementById('status');
-        statusDiv.textContent = status.length > 0 ? status.join(', ') : 'Not connected';
-      }
+      setTimeout(() => {
+        if (popupLocalhost && !popupLocalhost.closed) popupLocalhost.close();
+        if (popupMariana && !popupMariana.closed) popupMariana.close();
+      }, 1000);
     }
 
-    // Run immediately and then every 5 seconds
-    checkConnections();
-    setInterval(checkConnections, 5000);
+    window.addEventListener('message', (event) => {
+      const statusDiv = document.getElementById('status');
+      if (event.origin === 'http://localhost:8000' || event.origin === 'http://local.mariana') {
+        statusDiv.textContent = `Device status: ${event.origin} reports "${event.data}"`;
+      }
+    });
+
+    document.getElementById('checkBtn').addEventListener('click', () => {
+      openStatusWindows();
+    });
   </script>
 </body>
 </html>
