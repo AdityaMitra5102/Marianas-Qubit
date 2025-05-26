@@ -4,7 +4,7 @@
   <title>Connection Status</title>
 </head>
 <body>
-       <img src="http://local.mariana:5000/favicon.ico"
+       <img src="http://local.mariana/favicon.ico"
      onload="console.log('Device is online!')"
      onerror="console.log('Device is offline or unreachable.')">
   <div id="status">Not connected</div>
@@ -14,7 +14,7 @@
       
       // Check local server
       try {
-        const localResponse = await fetch('http://localhost:8000/active');
+        const localResponse = await fetch(`http://localhost:8000/active?cacheBust=${Date.now()}`);
         const localText = await localResponse.text();
         if (localText.trim() === 'true') {
           status.push('Connected via local client');
@@ -22,7 +22,15 @@
       } catch (e) {
         // Local connection failed, do nothing
       }
-      
+      try {
+        const localResponse = await fetch(`http://10.55.0.1/active?cacheBust=${Date.now()}`);
+        const localText = await localResponse.text();
+        if (localText.trim() === 'true') {
+          status.push('Connected via external client');
+        }
+      } catch (e) {
+        // Local connection failed, do nothing
+      }
       // Check RPi DNS reachability
 
 
