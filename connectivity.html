@@ -429,9 +429,9 @@ font-family: 'Courier New', Courier, monospace;
   <div class="text">to Mariana&apos;s Qubit</div>
   <br><br>
 
-  <div id="status" class="textsmall">Status not checked yet.</div>
+  <div id="status" class="textsmall">⚠️ Status not checked yet.</div>
   <br><br>
-  <button id="startCheck">Check Device Status</button>
+  <button id="startCheck">Check Connectivity</button>
   <br><br>
   <button id="browseDaemon" onclick="window.location.href='http://localhost:8000';">Browse via Mariana Daemon</button>
       <br><br>
@@ -454,7 +454,7 @@ font-family: 'Courier New', Courier, monospace;
       const statuses = [];
       if (statusTracker.localhost) 
       {
-        statuses.push('Connected via Mariana Daemon');
+        statuses.push('✅ Connected via Mariana Daemon');
         document.getElementById('browseDaemon').disabled=false;
       }
       else
@@ -463,7 +463,7 @@ font-family: 'Courier New', Courier, monospace;
       }
       if (statusTracker.mariana) 
       {
-        statuses.push('Connected via Mariana Stick');
+        statuses.push('✅ Connected via Mariana Stick');
     document.getElementById('browseStick').disabled=false;
       }
       else
@@ -472,7 +472,7 @@ font-family: 'Courier New', Courier, monospace;
       }
 
       if (statuses.length > 0 || force) {
-        statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : 'No devices connected';
+        statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : '❌ Not connected';
       }
     }
 
