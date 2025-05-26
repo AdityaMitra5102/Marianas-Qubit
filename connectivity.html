@@ -446,27 +446,29 @@ font-family: 'Courier New', Courier, monospace;
       localhost: false,
       mariana: false
     };
-
+    document.getElementById('browseDaemon').disabled=false;
+    document.getElementById('browseStick').disabled=false;
+    
     function updateStatusText(force = false) {
       const statusDiv = document.getElementById('status');
       const statuses = [];
       if (statusTracker.localhost) 
       {
         statuses.push('Connected via Mariana Daemon');
-        document.getElementById('browseDaemon').style="display: block;";
+        document.getElementById('browseDaemon').disabled=false;
       }
       else
       {
-        document.getElementById('browseDaemon').style="display: none;";
+        document.getElementById('browseDaemon').disabled=true;
       }
       if (statusTracker.mariana) 
       {
         statuses.push('Connected via Mariana Stick');
-    document.getElementById('browseStick').style="display: block;";
+    document.getElementById('browseStick').disabled=false;
       }
       else
       {
-        document.getElementById('browseStick').style="display: none;";
+        document.getElementById('browseDaemon').disabled=true;
       }
 
       if (statuses.length > 0 || force) {
