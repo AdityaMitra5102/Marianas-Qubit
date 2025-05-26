@@ -19,44 +19,60 @@
 <body>
   <h2>Device Status Checker</h2>
   <button id="checkBtn">Check Device Status</button>
-  <div id="status">Click "Check Device Status" to start.</div>
+  <div id="status">Click the button to start checking.</div>
 
   <script>
+    let checkInterval = null;
     let popupLocalhost = null;
     let popupMariana = null;
 
     function openStatusWindows() {
-      const statusDiv = document.getElementById('status');
-      statusDiv.textContent = 'Checking devices...';
-
-      const features = 'width=300,height=150,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no';
-
+      const features = 'width=1,height=1,top=10000,left=10000';
       popupLocalhost = window.open('http://localhost:8000/checkstatus', 'popupLocalhost', features);
       popupMariana = window.open('http://local.mariana/checkstatus', 'popupMariana', features);
 
-      if (!popupLocalhost || popupLocalhost.closed) {
-        statusDiv.textContent = 'Popup blocked! Please allow popups and try again.';
-        return;
-      }
-      if (!popupMariana || popupMariana.closed) {
-        statusDiv.textContent += ' Popup for local.mariana blocked!';
-      }
-
+      // Auto-close after 1 sec
       setTimeout(() => {
         if (popupLocalhost && !popupLocalhost.closed) popupLocalhost.close();
         if (popupMariana && !popupMariana.closed) popupMariana.close();
       }, 1000);
     }
 
-    window.addEventListener('message', (event) => {
+    const statusTracker = {
+      localhost: false,
+      mariana: false,
+    };
+
+    function updateStatusText() {
       const statusDiv = document.getElementById('status');
-      if (event.origin === 'http://localhost:8000' || event.origin === 'http://local.mariana') {
-        statusDiv.textContent = `Device status: ${event.origin} reports "${event.data}"`;
+      const statuses = [];
+      if (statusTracker.localhost) statuses.push('Connected via Mariana Daemon');
+      if (statusTracker.mariana) statuses.push('Connected via Mariana Stick');
+      statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : 'No devices connected';
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.origin === 'http://localhost:8000') {
+        statusTracker.localhost = true;
+      } else if (event.origin === 'http://local.mariana') {
+        statusTracker.mariana = true;
       }
+      updateStatusText();
     });
 
-    document.getElementById('checkBtn').addEventListener('click', () => {
+    function checkDevices() {
+      // Reset flags on each check
+      statusTracker.localhost = false;
+      statusTracker.mariana = false;
+      updateStatusText();
+
       openStatusWindows();
+    }
+
+    document.getElementById('checkBtn').addEventListener('click', () => {
+      checkDevices(); // Run immediately
+      if (checkInterval) clearInterval(checkInterval);
+      checkInterval = setInterval(checkDevices, 10000); // Every 10 sec
     });
   </script>
 </body>
