@@ -1,78 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Device Status Checker</title>
+  <title>Mariana Device Checker</title>
   <style>
     #status {
-      margin-top: 1em;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
+      font-family: sans-serif;
+      font-size: 1.2em;
+      margin-top: 20px;
     }
-    #checkBtn {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+    button {
+      padding: 10px 15px;
+      font-size: 1em;
     }
   </style>
 </head>
 <body>
-  <h2>Device Status Checker</h2>
-  <button id="checkBtn">Check Device Status</button>
-  <div id="status">Click the button to start checking.</div>
+  <h2>Mariana Device Status</h2>
+  <button id="startCheck">Check Device Status</button>
+  <div id="status">Status not checked yet.</div>
 
   <script>
-    let checkInterval = null;
-    let popupLocalhost = null;
-    let popupMariana = null;
-
-    function openStatusWindows() {
-      const features = 'width=1,height=1,top=10000,left=10000';
-      popupLocalhost = window.open('http://localhost:8000/checkstatus', 'popupLocalhost', features);
-      popupMariana = window.open('http://local.mariana/checkstatus', 'popupMariana', features);
-
-      // Auto-close after 1 sec
-      setTimeout(() => {
-        if (popupLocalhost && !popupLocalhost.closed) popupLocalhost.close();
-        if (popupMariana && !popupMariana.closed) popupMariana.close();
-      }, 1000);
-    }
-
-    const statusTracker = {
+    let statusTracker = {
       localhost: false,
-      mariana: false,
+      mariana: false
     };
 
-    function updateStatusText() {
+    function updateStatusText(force = false) {
       const statusDiv = document.getElementById('status');
       const statuses = [];
       if (statusTracker.localhost) statuses.push('Connected via Mariana Daemon');
       if (statusTracker.mariana) statuses.push('Connected via Mariana Stick');
-      statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : 'No devices connected';
+
+      if (statuses.length > 0 || force) {
+        statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : 'No devices connected';
+      }
+    }
+
+    function openStatusWindows() {
+      const localhostWindow = window.open('http://localhost:8000/checkstatus', '_blank', 'width=1,height=1');
+      const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1');
+
+      setTimeout(() => {
+        if (localhostWindow) localhostWindow.close();
+        if (marianaWindow) marianaWindow.close();
+      }, 1000);
+    }
+
+    function checkDevices() {
+      // Reset status but don't update UI yet
+      statusTracker.localhost = false;
+      statusTracker.mariana = false;
+
+      openStatusWindows();
+
+      // Wait 1.2s before declaring no devices found
+      setTimeout(() => {
+        updateStatusText(true); // Force update even if no postMessages
+      }, 1200);
     }
 
     window.addEventListener('message', (event) => {
-      if (event.origin === 'http://localhost:8000') {
+      const origin = event.origin || '';
+      if (origin.includes('localhost')) {
         statusTracker.localhost = true;
-      } else if (event.origin === 'http://local.mariana') {
+      } else if (origin.includes('local.mariana')) {
         statusTracker.mariana = true;
       }
-      updateStatusText();
+      updateStatusText(); // Update on each success
     });
 
-    function checkDevices() {
-      // Reset flags on each check
-      statusTracker.localhost = false;
-      statusTracker.mariana = false;
-      updateStatusText();
-
-      openStatusWindows();
-    }
-
-    document.getElementById('checkBtn').addEventListener('click', () => {
-      checkDevices(); // Run immediately
-      if (checkInterval) clearInterval(checkInterval);
-      checkInterval = setInterval(checkDevices, 10000); // Every 10 sec
+    let intervalId;
+    document.getElementById('startCheck').addEventListener('click', () => {
+      checkDevices();
+      if (!intervalId) {
+        intervalId = setInterval(checkDevices, 10000); // every 10s
+      }
+      alert("If popups are blocked, please allow them for this site.");
     });
   </script>
 </body>
