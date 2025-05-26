@@ -433,7 +433,8 @@ font-family: 'Courier New', Courier, monospace;
   <br><br>
   <button id="startCheck">Check Device Status</button>
   <br><br>
-  
+  <button id="browseDaemon" style="display: none;" onclick="window.open('http://localhost:8000');">Browse via Mariana Daemon</button>
+  <button id="browseStick" style="display: none;" onclick="window.open('http://local.mariana');">Browse via Mariana Stick</button>
    
 
 
@@ -448,8 +449,24 @@ font-family: 'Courier New', Courier, monospace;
     function updateStatusText(force = false) {
       const statusDiv = document.getElementById('status');
       const statuses = [];
-      if (statusTracker.localhost) statuses.push('Connected via Mariana Daemon');
-      if (statusTracker.mariana) statuses.push('Connected via Mariana Stick');
+      if (statusTracker.localhost) 
+      {
+        statuses.push('Connected via Mariana Daemon');
+        document.getElementById('browseDaemon').style="display: block;";
+      }
+      else
+      {
+        document.getElementById('browseDaemon').style="display: none;";
+      }
+      if (statusTracker.mariana) 
+      {
+        statuses.push('Connected via Mariana Stick');
+    document.getElementById('browseStick').style="display: block;";
+      }
+      else
+      {
+        document.getElementById('browseStick').style="display: none;";
+      }
 
       if (statuses.length > 0 || force) {
         statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : 'No devices connected';
@@ -457,7 +474,6 @@ font-family: 'Courier New', Courier, monospace;
     }
 
     function openStatusWindows() {
-        console.log('OPening windows');
       const localhostWindow = window.open('http://localhost:8000/checkstatus', '_blank', 'width=1,height=1');
       const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1');
 
