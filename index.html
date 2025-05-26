@@ -474,8 +474,8 @@ font-family: 'Courier New', Courier, monospace;
     }
 
     function openStatusWindows() {
-      const localhostWindow = window.open('http://localhost:8000/checkstatus', '_blank', 'width=1,height=1');
-      const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1');
+      const localhostWindow = window.open('http://localhost:8000/checkstatus', '_blank', 'width=1,height=1,top=10000,left=10000');
+      const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1,top=10000,left=10000');
 
       setTimeout(() => {
         if (localhostWindow) localhostWindow.close();
