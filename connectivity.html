@@ -503,6 +503,7 @@ font-family: 'Courier New', Courier, monospace;
 
     let intervalId;
     document.getElementById('startCheck').addEventListener('click', () => {
+        document.getElementById('startCheck').style='display: none;';
       checkDevices();
       if (!intervalId) {
         intervalId = setInterval(checkDevices, 10000); // every 10s
