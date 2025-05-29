@@ -433,7 +433,7 @@ font-family: 'Courier New', Courier, monospace;
   <br><br>
   <button id="startCheck">Check Connectivity</button>
   <br><br>
-  <button id="browseMariana" style="display: none;">Browse</button>
+  <button id="browseMariana" style="display: none;" onclick="browse();">Browse</button>
 
 
 </div>
@@ -456,7 +456,6 @@ font-family: 'Courier New', Courier, monospace;
 else
       {
  document.getElementById('browseMariana').style="display: none;"
-
       }
 
 
@@ -466,6 +465,19 @@ else
       }
     }
 
+function browse()
+    {
+        if (statusTracker.localhost)
+        {
+            window.location.href="http://localhost:8000/";
+        }
+else
+        {
+window.location.href="http://local.mariana";
+
+        }
+    }
+    
     function openStatusWindows() {
       
       const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1,top=10000,left=10000');
