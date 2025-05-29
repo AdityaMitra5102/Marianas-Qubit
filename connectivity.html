@@ -433,7 +433,7 @@ font-family: 'Courier New', Courier, monospace;
   <br><br>
   <button id="startCheck">Check Connectivity</button>
   <br><br>
-  
+  <button id="browseMariana" style="display: none;">Browse</button>
 
 
 </div>
@@ -450,8 +450,16 @@ font-family: 'Courier New', Courier, monospace;
       if (statusTracker.mariana) 
       {
         statuses.push('✅ Connected');
+          document.getElementById('browseMariana').style="display: block;"
 
       }
+else
+      {
+ document.getElementById('browseMariana').style="display: none;"
+
+      }
+
+
 
       if (statuses.length > 0 || force) {
         statusDiv.textContent = statuses.length > 0 ? statuses.join(', ') : '❌ Not connected';
@@ -470,7 +478,7 @@ font-family: 'Courier New', Courier, monospace;
 
     function checkDevices() {
       // Reset status but don't update UI yet
-    
+      statusTracker.localhost=false;
       statusTracker.mariana = false;
 
       openStatusWindows();
@@ -478,6 +486,7 @@ font-family: 'Courier New', Courier, monospace;
     fetch('http://localhost:8000/active')
   .then(response => {
     if (response.status === 200) {
+        statusTracker.localhost=true;
       statusTracker.mariana = true;
     } else {
       console.log(`Error: HTTP ${response.status} - ${response.statusText}`);
