@@ -433,10 +433,7 @@ font-family: 'Courier New', Courier, monospace;
   <br><br>
   <button id="startCheck">Check Connectivity</button>
   <br><br>
-  <button id="browseDaemon" onclick="window.location.href='http://localhost:8000';">Browse via Mariana Daemon</button>
-      <br><br>
-  <button id="browseStick" onclick="window.location.href='http://local.mariana';">Browse via Mariana Stick</button>
-   
+  
 
 
 </div>
@@ -446,29 +443,14 @@ font-family: 'Courier New', Courier, monospace;
       localhost: false,
       mariana: false
     };
-    document.getElementById('browseDaemon').disabled=true;
-    document.getElementById('browseStick').disabled=true;
     
     function updateStatusText(force = false) {
       const statusDiv = document.getElementById('status');
       const statuses = [];
-      if (statusTracker.localhost) 
-      {
-        statuses.push('✅ Connected via Mariana Daemon');
-        document.getElementById('browseDaemon').disabled=false;
-      }
-      else
-      {
-        document.getElementById('browseDaemon').disabled=true;
-      }
       if (statusTracker.mariana) 
       {
-        statuses.push('✅ Connected via Mariana Stick');
-    document.getElementById('browseStick').disabled=false;
-      }
-      else
-      {
-        document.getElementById('browseStick').disabled=true;
+        statuses.push('✅ Connected');
+
       }
 
       if (statuses.length > 0 || force) {
@@ -477,22 +459,34 @@ font-family: 'Courier New', Courier, monospace;
     }
 
     function openStatusWindows() {
-      const localhostWindow = window.open('http://localhost:8000/checkstatus', '_blank', 'width=1,height=1,top=10000,left=10000');
+      
       const marianaWindow = window.open('http://local.mariana/checkstatus', '_blank', 'width=1,height=1,top=10000,left=10000');
 
       setTimeout(() => {
-        if (localhostWindow) localhostWindow.close();
+      
         if (marianaWindow) marianaWindow.close();
       }, 1000);
     }
 
     function checkDevices() {
       // Reset status but don't update UI yet
-      statusTracker.localhost = false;
+    
       statusTracker.mariana = false;
 
       openStatusWindows();
 
+    fetch('http://localhost:8000/active')
+  .then(response => {
+    if (response.status === 200) {
+      statusTracker.mariana = true;
+    } else {
+      console.log(`Error: HTTP ${response.status} - ${response.statusText}`);
+    }
+  })
+  .catch(error => {
+    // Handle network errors, endpoint not reachable, etc.
+    console.log('Error:', error.message);
+  });
       // Wait 1.2s before declaring no devices found
       setTimeout(() => {
         updateStatusText(true); // Force update even if no postMessages
@@ -501,9 +495,7 @@ font-family: 'Courier New', Courier, monospace;
 
     window.addEventListener('message', (event) => {
       const origin = event.origin || '';
-      if (origin.includes('localhost')) {
-        statusTracker.localhost = true;
-      } else if (origin.includes('local.mariana')) {
+      if (origin.includes('local.mariana')) {
         statusTracker.mariana = true;
       }
       updateStatusText(); // Update on each success
